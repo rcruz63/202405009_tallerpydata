@@ -14,7 +14,6 @@ def main():
     global openai_api_key
     global _cache
     global urls
-    global embeddings
     global chunks
     global names
 
@@ -53,14 +52,7 @@ def main():
     # Extraer el contenido de las URLs y calcular sus embeddings
     names = list(urls.keys())
     chunks = [extract_text_from_url(url) for url in urls.values()]
-    embeddings = [get_embedding(chunk) for chunk in chunks]
 
-    # Escribir los embeddings, chunks y names en un archivo python .py en forma de lista que se pueda importar
-    with open('embeddings.py', 'w') as file:
-        file.write("embeddings = [\n")
-        for embedding in embeddings:
-            file.write(f"    {str(embedding)},\n")
-        file.write("]\n\n")
     with open('chunks.py', 'w') as file:
         file.write("chunks = [\n")
         for chunk in chunks:
@@ -142,25 +134,6 @@ def generate_summary(text, max_tokens=3000):
 # Función para calcular la similitud coseno
 def cosine_similarity(a, b):
     return np.dot(a, b) / (np.linalg.norm(a) * np.linalg.norm(b))
-
-
-# Función para consultar la base de datos
-def query_bbdd(query, top_n=5):
-    start_time = time.time()
-    query_embedding = get_embedding(query)
-
-    # Calcular la similitud coseno entre la consulta y cada embedding de los chunks
-    similarities = [cosine_similarity(query_embedding, embedding) for embedding in embeddings]
-
-    # Obtener los índices de los top-n chunks más similares
-    top_indices = np.argsort(similarities)[-top_n:]
-
-    # Recuperar los top-n chunks más similares junto con su similitud coseno
-    top_chunks = [(names[i], chunks[i], similarities[i]) for i in top_indices]
-    end_time = time.time()
-    print(f"query_bbdd took {end_time - start_time:.2f} seconds")
-
-    return top_chunks
 
 
 # Función para extraer contenido de una URL
