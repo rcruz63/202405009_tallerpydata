@@ -11,7 +11,12 @@ from names import names
 
 def main(query):
 
-    global _cache, embeddings, client
+    response = chatbot_rag(query)
+    print(response.choices[0].message.content)
+
+
+def init(query):
+    global client, _cache, embeddings
 
     load_dotenv()
     openai_api_key = os.getenv('OPENAI_API_KEY')
@@ -26,8 +31,6 @@ def main(query):
     embeddings = [get_embedding(chunk) for chunk in chunks]
     # end_time = time.time()
     # print(f"Embeddings took {end_time - star_time:.2f} seconds")
-    response = chatbot_rag(query)
-    print(response.choices[0].message.content)
 
 
 # Función para crear claves de caché
@@ -88,6 +91,7 @@ def query_bbdd(query, top_n=5):
 
 
 def chatbot_rag(pregunta):
+    init(pregunta)
     # start_time = time.time()
     results = query_bbdd(pregunta)
     if len(results) == 0:
